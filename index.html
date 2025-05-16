@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Advanced UI Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    .container {
+      background: rgba(255,255,255,0.2);
+      box-shadow: 0 8px 32px 0 rgba(31,38,135,0.37);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 2rem 2.5rem;
+      width: 95vw;
+      max-width: 600px;
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 1s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(40px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      justify-content: center;
+    }
+    .tab-btn {
+      background: rgba(255,255,255,0.4);
+      border: none;
+      outline: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 18px 18px 0 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+      box-shadow: 0 2px 8px rgba(31,38,135,0.07);
+    }
+    .tab-btn.active {
+      background: #fff;
+      color: #4CAF50;
+      box-shadow: 0 4px 16px rgba(31,38,135,0.13);
+    }
+    .tab-content {
+      width: 100%;
+      min-height: 300px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 0 0 18px 18px;
+      box-shadow: 0 2px 8px rgba(31,38,135,0.07);
+      padding: 2rem 1.5rem;
+      animation: fadeInTab 0.5s;
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    @keyframes fadeInTab {
+      from { opacity: 0; transform: translateY(20px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    /* Live Stream styling */
+    .stream-frame {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      min-height: 180px;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(31,38,135,0.13);
+      background: #222;
+      display: block;
+    }
+    /* Allow/Deny styling */
+    .status-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .status-btn {
+      padding: 0.8rem 2rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+      margin-top: 1rem;
+    }
+    .allow {
+      background: #4CAF50;
+      color: #fff;
+    }
+    .deny {
+      background: #e74c3c;
+      color: #fff;
+    }
+    .status-btn.active {
+      box-shadow: 0 0 0 3px #4CAF5055;
+      filter: brightness(1.1);
+    }
+    .status-btn.deny.active {
+      box-shadow: 0 0 0 3px #e74c3c55;
+    }
+    .status-msg {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #333;
+      margin-top: 1rem;
+      min-height: 1.5em;
+    }
+    @media (max-width: 700px) {
+      .container { padding: 1rem 0.5rem; }
+      .tab-content { padding: 1rem 0.5rem; }
+      .stream-frame { min-height: 120px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="stream">Live Stream</button>
+      <button class="tab-btn" data-tab="allow">Allow</button>
+      <button class="tab-btn" data-tab="deny">Deny</button>
+    </div>
+    <div id="stream" class="tab-content active">
+      <h2 style="margin-top:0;">Live Stream</h2>
+      <iframe class="stream-frame" src="http://192.168.86.195:81/stream" allowfullscreen></iframe>
+    </div>
+    <div id="allow" class="tab-content">
+      <h2 style="margin-top:0;">Allow/Deny Access</h2>
+      <div class="status-section">
+        <button class="status-btn allow" id="allow-btn" onclick="setStatus('allow')">Allow</button>
+        <button class="status-btn deny" id="deny-btn" onclick="setStatus('deny')">Deny</button>
+        <div class="status-msg" id="allow-msg"></div>
+      </div>
+    </div>
+    <div id="deny" class="tab-content">
+      <h2 style="margin-top:0;">Deny Access</h2>
+      <div class="status-section">
+        <button class="status-btn deny" onclick="openDeny()">Go to Deny Page</button>
+        <div class="status-msg" id="deny-msg"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Tab switching logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(tc => tc.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Allow/Deny toggle logic for Allow tab
+    function setStatus(status) {
+      const allowBtn = document.getElementById('allow-btn');
+      const denyBtn = document.getElementById('deny-btn');
+      const msg = document.getElementById('allow-msg');
+      if (status === 'allow') {
+        allowBtn.classList.add('active');
+        denyBtn.classList.remove('active');
+        msg.textContent = "Access Allowed!";
+        allowBtn.disabled = true;
+        denyBtn.disabled = false;
+        window.open('http://192.168.166.190/deny', '_blank');
+      } else {
+        denyBtn.classList.add('active');
+        allowBtn.classList.remove('active');
+        msg.textContent = "Access Denied!";
+        denyBtn.disabled = true;
+        allowBtn.disabled = false;
+        window.open('http://192.168.166.190/allow', '_blank');
+      }
+      setTimeout(() => { msg.textContent = ""; }, 3000);
+    }
+
+    // Deny tab logic
+    function openDeny() {
+      window.open('http://192.168.166.190/allow', '_blank');
+      document.getElementById('deny-msg').textContent = "Deny page opened in new tab.";
+      setTimeout(() => { document.getElementById('deny-msg').textContent = ""; }, 3000);
+    }
+  </script>
+</body>
+</html>
