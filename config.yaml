@@ -1,0 +1,7 @@
+# config.yaml
+app_name: ESP-MotionGuard
+version: 1.0
+devices:
+  esp32_cam_ip: 192.168.86.195
+  esp8266_ip: 192.168.86.190
+alert_sound: alert.mp3
